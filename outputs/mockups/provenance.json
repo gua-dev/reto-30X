@@ -1,0 +1,106 @@
+{
+  "version": 3,
+  "capturedOn": "2026-10-17",
+  "source": "Capturas del prototipo local realizadas por el agente implementador",
+  "data": "Sintéticos",
+  "payments": "Simulados",
+  "email": "Simulado",
+  "timing": "Ilustrativo, no medido",
+  "images": [
+    {
+      "file": "01-bandeja-desktop.jpg",
+      "title": "Facturas: origen, estado y acciones",
+      "surface": "desktop"
+    },
+    {
+      "file": "03-reglas-desktop.jpg",
+      "title": "Reglas: tablero Por revisar y Rechazado",
+      "surface": "desktop"
+    },
+    {
+      "file": "16-correos-desktop.jpg",
+      "title": "Bandeja de correos: hilos y respuestas",
+      "surface": "desktop"
+    },
+    {
+      "file": "10-ficha-proveedor-desktop.jpg",
+      "title": "Proveedor: cuentas y notas",
+      "surface": "desktop"
+    },
+    {
+      "file": "02-detalle-desktop.jpg",
+      "title": "Detalle: decisión y evidencia",
+      "surface": "desktop"
+    },
+    {
+      "file": "08-tasas-desktop.jpg",
+      "title": "Tasas: pares, fuente y favoritos",
+      "surface": "desktop"
+    },
+    {
+      "file": "09-anadir-factura-desktop.jpg",
+      "title": "Añadir factura: carga primero",
+      "surface": "desktop"
+    },
+    {
+      "file": "17-estadisticas-desktop.jpg",
+      "title": "Estadísticas: conteos y tiempos ilustrativos",
+      "surface": "desktop"
+    },
+    {
+      "file": "07-proveedores-desktop.jpg",
+      "title": "Directorio: alta y edición manual",
+      "surface": "desktop"
+    },
+    {
+      "file": "04-registro-desktop.jpg",
+      "title": "Registro de decisiones",
+      "surface": "desktop"
+    },
+    {
+      "file": "14-editar-criterio-desktop.jpg",
+      "title": "Constructor de criterio",
+      "surface": "desktop"
+    },
+    {
+      "file": "05-bandeja-mobile.jpg",
+      "title": "Facturas en móvil",
+      "surface": "mobile"
+    },
+    {
+      "file": "11-reglas-mobile.jpg",
+      "title": "Tablero y acciones en móvil",
+      "surface": "mobile"
+    },
+    {
+      "file": "18-correos-mobile.jpg",
+      "title": "Bandeja de correos en móvil",
+      "surface": "mobile"
+    },
+    {
+      "file": "13-proveedores-mobile.jpg",
+      "title": "Directorio en móvil",
+      "surface": "mobile"
+    },
+    {
+      "file": "06-detalle-mobile.jpg",
+      "title": "Detalle en móvil",
+      "surface": "mobile"
+    },
+    {
+      "file": "12-anadir-factura-mobile.jpg",
+      "title": "Carga en móvil",
+      "surface": "mobile"
+    },
+    {
+      "file": "19-tasas-mobile.jpg",
+      "title": "Tasas en móvil",
+      "surface": "mobile"
+    },
+    {
+      "file": "20-estadisticas-mobile.jpg",
+      "title": "Estadísticas en móvil",
+      "surface": "mobile"
+    }
+  ]
+}

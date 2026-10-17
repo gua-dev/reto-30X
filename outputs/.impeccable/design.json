@@ -1,0 +1,311 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-17T20:07:57.483Z",
+  "title": "Design System: Blinka Guard",
+  "extensions": {
+    "colorMeta": {
+      "ink": {
+        "role": "neutral",
+        "displayName": "Azul marino"
+      },
+      "text": {
+        "role": "neutral",
+        "displayName": "text"
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "muted"
+      },
+      "bg": {
+        "role": "neutral",
+        "displayName": "Marfil"
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "surface"
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "line"
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "Cobalto de acción"
+      },
+      "accent-hover": {
+        "role": "primary",
+        "displayName": "accent-hover"
+      },
+      "mint": {
+        "role": "neutral",
+        "displayName": "Azul pálido (nombre CSS histórico mint)"
+      },
+      "warn": {
+        "role": "semantic",
+        "displayName": "warn"
+      },
+      "warn-bg": {
+        "role": "semantic",
+        "displayName": "warn-bg"
+      },
+      "danger": {
+        "role": "semantic",
+        "displayName": "danger"
+      },
+      "danger-bg": {
+        "role": "semantic",
+        "displayName": "danger-bg"
+      },
+      "approved": {
+        "role": "semantic",
+        "displayName": "approved"
+      },
+      "approved-bg": {
+        "role": "semantic",
+        "displayName": "approved-bg"
+      },
+      "nav-bg": {
+        "role": "neutral",
+        "displayName": "nav-bg"
+      },
+      "nav-active-bg": {
+        "role": "neutral",
+        "displayName": "nav-active-bg"
+      },
+      "nav-active-text": {
+        "role": "neutral",
+        "displayName": "nav-active-text"
+      },
+      "focus": {
+        "role": "neutral",
+        "displayName": "focus"
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Título principal",
+        "purpose": "Jerarquía principal de la aplicación."
+      },
+      "body": {
+        "displayName": "Texto de interfaz",
+        "purpose": "Pila CSS local: Segoe UI, Inter, Arial, sans-serif; no hay carga de webfonts."
+      },
+      "mono": {
+        "displayName": "Monoespaciada",
+        "purpose": "Consolas, monospace para datos técnicos y recibos simulados."
+      }
+    },
+    "shadows": [
+      {
+        "name": "overlay",
+        "value": "0 16px 48px rgba(27,55,44,.14)",
+        "purpose": "Diálogo y aviso flotante; variable --shadow."
+      },
+      {
+        "name": "paper",
+        "value": "0 7px 20px #34492a0b",
+        "purpose": "Papel de evidencia simulada."
+      }
+    ],
+    "motion": [
+      {
+        "name": "toast",
+        "value": "opacity .18s,transform .18s",
+        "purpose": "Entrada y salida del aviso flotante; desplazamiento vertical de 15px a 0."
+      },
+      {
+        "name": "skeleton",
+        "value": "pulse 1s ease-in-out infinite alternate",
+        "purpose": "Opacidad final .4 en el esqueleto."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "animation:none!important;transition:none!important;scroll-behavior:auto!important",
+        "purpose": "Regla global bajo prefers-reduced-motion:reduce."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "wide-min",
+        "value": "1500px"
+      },
+      {
+        "name": "compact-max",
+        "value": "1200px"
+      },
+      {
+        "name": "tablet-max",
+        "value": "900px"
+      },
+      {
+        "name": "mobile-max",
+        "value": "600px"
+      },
+      {
+        "name": "fx-two-columns-max",
+        "value": "1100px"
+      },
+      {
+        "name": "extended-mobile-max",
+        "value": "700px"
+      }
+    ],
+    "focus": {
+      "general": {
+        "value": "outline:3px solid #2a4bd0;outline-offset:4px",
+        "purpose": "Elementos interactivos con :focus-visible."
+      },
+      "search": {
+        "value": "outline:2px solid #2a4bd0;outline-offset:2px",
+        "purpose": "Contenedor de búsqueda con :focus-within."
+      }
+    },
+    "sources": {
+      "method": "Extracción manual sincronizada con la dirección visual aprobada y la cascada CSS final.",
+      "product": "PRODUCT.md",
+      "styles": "assets/styles.css",
+      "entrypoint": "index.html",
+      "fonts": {
+        "ui": [
+          "Segoe UI",
+          "Inter",
+          "Arial",
+          "sans-serif"
+        ],
+        "mono": [
+          "Consolas",
+          "monospace"
+        ],
+        "evidenceOnly": [
+          "Georgia",
+          "serif"
+        ],
+        "externalFontLoads": []
+      },
+      "behavior": [
+        "assets/app.js",
+        "assets/domain.js"
+      ]
+    },
+    "backdrop": {
+      "dialog": "#1c253a60"
+    },
+    "previewScope": "Los snippets documentan aspecto y estados CSS; las acciones de dominio y sugerencias editables se ejecutan en assets/app.js."
+  },
+  "components": [
+    {
+      "name": "Botón principal",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Acción principal de la pantalla.",
+      "html": "<button class=\"ds-primary\">Guardar reglas</button>",
+      "css": ".ds-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid #d1d7e5;border-radius:999px;font:600 12px/1.5 \"Segoe UI\",Inter,Arial,sans-serif;padding:10px 14px;min-height:40px;cursor:pointer;background:var(--accent,#2a4bd0);border-color:var(--accent,#2a4bd0);color:#fff}.ds-primary:hover{background:var(--accent-hover,#203ca8)}.ds-primary:focus-visible{outline:3px solid #2a4bd0;outline-offset:4px}.ds-primary:disabled{opacity:.48;cursor:not-allowed}"
+    },
+    {
+      "name": "Botón secundario",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Acción complementaria.",
+      "html": "<button class=\"ds-secondary\">Cancelar</button>",
+      "css": ".ds-secondary{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid #d1d7e5;border-radius:999px;font:600 12px/1.5 \"Segoe UI\",Inter,Arial,sans-serif;padding:10px 14px;min-height:40px;cursor:pointer;background:var(--surface,#fff);color:var(--ink,#1c253a)}.ds-secondary:hover{background:#f0f2fa}.ds-secondary:focus-visible{outline:3px solid #2a4bd0;outline-offset:4px}.ds-secondary:disabled{opacity:.48;cursor:not-allowed}"
+    },
+    {
+      "name": "Botón de rechazo",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "Acción de rechazo con texto explícito.",
+      "html": "<button class=\"ds-danger\">Rechazar factura</button>",
+      "css": ".ds-danger{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid #d1d7e5;border-radius:999px;font:600 12px/1.5 \"Segoe UI\",Inter,Arial,sans-serif;padding:10px 14px;min-height:40px;cursor:pointer;background:#fff;color:var(--danger,#a03f37);border-color:#d6aaa5}.ds-danger:hover{background:#fff}.ds-danger:focus-visible{outline:3px solid #2a4bd0;outline-offset:4px}.ds-danger:disabled{opacity:.48;cursor:not-allowed}"
+    },
+    {
+      "name": "Campo numérico",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Entrada con etiqueta, foco y borde de error.",
+      "html": "<label class=\"ds-field\">Límite por factura<input class=\"ds-input\" type=\"number\" value=\"2500\"></label>",
+      "css": ".ds-field{display:block;font:600 12px/1.5 \"Segoe UI\",Inter,Arial,sans-serif;color:var(--text,#1c253a)}.ds-input{display:block;margin-top:7px;width:100%;max-width:280px;min-height:44px;border:1px solid #c8d0e0;border-radius:7px;background:#fff;padding:10px 12px;color:var(--ink,#1c253a);font:400 14px/1.5 \"Segoe UI\",Inter,Arial,sans-serif;caret-color:var(--accent,#2a4bd0)}.ds-input:focus-visible{outline:3px solid #2a4bd0;outline-offset:4px}.ds-input[aria-invalid=true]{border-color:var(--danger,#a03f37)}"
+    },
+    {
+      "name": "Navegación",
+      "kind": "nav",
+      "refersTo": "navigation",
+      "description": "Página actual con fondo tonal.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Principal\"><a href=\"#facturas\" aria-current=\"page\">Facturas</a><a href=\"#reglas\">Reglas</a></nav>",
+      "css": ".ds-nav{display:flex;flex-direction:column;gap:6px;padding:12px;background:#f7f7f4;max-width:200px}.ds-nav a{padding:11px 10px;border-radius:8px;color:#596477;text-decoration:none;font:550 13px/1.5 \"Segoe UI\",Inter,Arial,sans-serif}.ds-nav a:hover{background:#eceff8}.ds-nav a[aria-current=page]{background:#e6ebff;color:#233ca0}.ds-nav a:focus-visible{outline:3px solid #2a4bd0;outline-offset:4px}"
+    },
+    {
+      "name": "Estado de revisión",
+      "kind": "chip",
+      "refersTo": "badge-review",
+      "description": "Etiqueta informativa que mantiene el significado en texto.",
+      "html": "<span class=\"ds-badge\">Por revisar</span>",
+      "css": ".ds-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 7px;border-radius:5px;font:600 10px/1.5 \"Segoe UI\",Inter,Arial,sans-serif;white-space:nowrap;background:var(--warn-bg,#fff2d8);color:var(--warn,#80540b)}"
+    },
+    {
+      "name": "Panel",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "Contenedor operativo sin sombra.",
+      "html": "<section class=\"ds-panel\"><h2>Reglas</h2><p>Consulta los criterios vigentes.</p></section>",
+      "css": ".ds-panel{background:#fff;border:1px solid var(--line,#dce0e8);border-radius:var(--radius,12px);padding:24px;font-family:\"Segoe UI\",Inter,Arial,sans-serif;color:var(--text,#1c253a)}.ds-panel h2{margin:0;color:var(--ink,#1c253a);font-size:18px;font-weight:650;line-height:1.35;letter-spacing:-.02em}.ds-panel p{font-size:12px;line-height:1.5;color:var(--muted,#596477);margin:7px 0 22px}"
+    },
+    {
+      "name": "Filtro seleccionado",
+      "kind": "button",
+      "refersTo": "tab-selected",
+      "description": "Filtro de tabla con estado aria-pressed.",
+      "html": "<button class=\"ds-tab\" aria-pressed=\"true\">Todas <span>8</span></button>",
+      "css": ".ds-tab{border:0;background:transparent;color:var(--muted,#596477);font:550 11px/1.5 \"Segoe UI\",Inter,Arial,sans-serif;border-radius:6px;padding:8px 10px;min-height:34px;cursor:pointer}.ds-tab:hover{background:#f0f2fa}.ds-tab[aria-pressed=true]{color:var(--ink,#1c253a);background:#e6ebff}.ds-tab span{margin-left:5px;font-size:10px;opacity:.85}.ds-tab:focus-visible{outline:3px solid #2a4bd0;outline-offset:4px}"
+    },
+    {
+      "name": "Sugerencia de comentario",
+      "kind": "button",
+      "refersTo": "suggestion",
+      "description": "Sugerencia contextual para un comentario opcional y editable.",
+      "html": "<button class=\"ds-suggestion\" type=\"button\">Revisé el acuerdo con el proveedor.</button>",
+      "css": ".ds-suggestion{font-family:\"Segoe UI\",Inter,Arial,sans-serif;color:var(--ink,#1c253a);border:1px solid #d3dbee;border-radius:8px;background:#f5f7fd;color:#324a8a;font-size:11px;padding:8px 10px;text-align:left;min-height:36px;cursor:pointer}.ds-suggestion:hover{background:#e7edff}.ds-suggestion:focus-visible{outline:3px solid var(--accent,#2a4bd0);outline-offset:4px}@media(max-width:700px){.ds-suggestion{min-height:44px}}"
+    },
+    {
+      "name": "Carga de factura",
+      "kind": "input",
+      "refersTo": "upload",
+      "description": "Documento sintético de hasta 1 MB con selector nativo y estado textual; no ejecuta OCR.",
+      "html": "<label class=\"ds-upload\"><strong>Seleccionar documento</strong><span>PDF, PNG, JPG o texto · máximo 1 MB</span><input type=\"file\" accept=\"application/pdf,image/png,image/jpeg,text/plain\"></label>",
+      "css": ".ds-upload{font-family:\"Segoe UI\",Inter,Arial,sans-serif;color:var(--ink,#1c253a);display:flex;flex-direction:column;gap:12px;justify-content:center;min-height:210px;padding:28px 22px;border:1px dashed #8a9ac9;border-radius:12px;background:#f5f7fd}.ds-upload span{font-size:12px;color:var(--muted,#596477)}.ds-upload input{max-width:100%;font-size:12px}.ds-upload input::file-selector-button{border:0;background:var(--accent,#2a4bd0);color:white;padding:10px 14px;border-radius:999px;margin:6px 10px 6px 0;cursor:pointer}.ds-upload input:focus-visible{outline:3px solid var(--accent,#2a4bd0);outline-offset:4px}@media(max-width:700px){.ds-upload{padding:18px;min-height:180px}}"
+    },
+    {
+      "name": "Tarjeta de criterio",
+      "kind": "custom",
+      "description": "Tarjeta movible con alternativa de selección y controles manuales.",
+      "html": "<article class=\"ds-criterion\"><strong>Cuenta registrada</strong><p>Los datos coinciden con la ficha.</p><label>Activo <input type=\"checkbox\" checked></label><label>Mover a <select><option>Por revisar</option><option>Rechazado</option></select></label></article>",
+      "css": ".ds-criterion{padding:18px;background:#fff;color:#1c253a;border:1px solid #dce0e8;border-radius:12px;font:14px/1.5 \"Segoe UI\",sans-serif}.ds-criterion p{color:#596477}.ds-criterion label{display:block;margin-top:12px}.ds-criterion select{padding:8px;border:1px solid #dce0e8;border-radius:7px}.ds-criterion select:focus-visible,.ds-criterion input:focus-visible{outline:3px solid #2a4bd0;outline-offset:3px}.ds-criterion:hover{border-color:#2a4bd0}"
+    }
+  ],
+  "narrative": {
+    "northStar": null,
+    "overview": "La dirección aprobada es una interfaz sobria inspirada en Blinka, con fondo marfil, texto azul marino y acciones cobalto. Finanzas y jurado tienen igual prioridad: la jerarquía visual permite reconocer el estado, comprender el motivo e inspeccionar la evidencia antes de abrir los detalles técnicos.\n\nLa implementación combina espacios amplios, superficies claras, bordes discretos, botones tipo píldora y tipografía de sistema. Las líneas fluidas decorativas se limitan a la nota de la barra lateral, fuera de los datos. No se ha acordado una metáfora creativa; esta documentación no introduce una. Esta actualización extrae el sistema de `assets/styles.css`, `assets/app.js` y `assets/domain.js`, en consonancia con `PRODUCT.md`. Describe la interfaz operativa; la hoja documental del handoff es una variante independiente.",
+    "keyCharacteristics": [
+      "Marfil de fondo, azul marino para lectura y cobalto para acciones.",
+      "Espacio amplio, superficies claras, bordes discretos y botones tipo píldora.",
+      "Estados con etiqueta textual y color.",
+      "Densidad operativa adaptable a móvil.",
+      "Foco visible y respeto al movimiento reducido."
+    ],
+    "rules": [],
+    "dos": [
+      "**Do** conservar etiquetas textuales junto al color de estado.",
+      "**Do** mantener estado, motivo y evidencia antes del detalle técnico.",
+      "**Do** conservar el foco visible y la variante de movimiento reducido.",
+      "**Do** usar la escala del prototipo para nuevas pantallas operativas.",
+      "**Do** mantener las líneas fluidas discretas fuera de los datos y conservar el espacio amplio.",
+      "**Do** distinguir cambios de configuración, reglas vigentes y decisión histórica con texto explícito."
+    ],
+    "donts": [
+      "**Don't** presentar el color como único indicador de estado.",
+      "**Don't** aplicar la escala de títulos del handoff a la interfaz operativa.",
+      "**Don't** atribuir a la interfaz fuentes externas que no están cargadas.",
+      "**Don't** presentar la inspiración en Blinka como afiliación oficial."
+    ]
+  }
+}
+

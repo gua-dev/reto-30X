@@ -1,0 +1,8 @@
+FACTURA SINTÉTICA · SOLO DEMOSTRACIÓN
+Proveedor: Proveedor de mantenimiento de prueba
+Referencia: DEMO-009
+Concepto: Mantenimiento de aire acondicionado
+Moneda: USD
+Total con impuestos: 100.00
+Vencimiento: 2026-10-30
+No ejecutar pagos.
