@@ -56,6 +56,8 @@
     if(['min','max'].includes(c.operator)&&!Number.isFinite(Number(c.value)))return 'Esta condición necesita un valor numérico.';
     return '';
   }
+  INVOICES.forEach(i=>{i.issueDate=i.issueDate||"2026-10-01";});
+  function sameInvoice(a,b){return a.key===b.key&&!!a.reference&&!!a.issueDate&&!!a.due&&String(a.reference).trim().toLowerCase()===String(b.reference||"" ).trim().toLowerCase()&&a.issueDate===b.issueDate&&a.due===b.due;}
   function evaluate(invoice,rules,available,providers=BASE_PROVIDERS,fx=BASE_FX,day=today()) {
     const provider=providers.items[invoice.key], rate=fxFor(invoice,fx,day), cents=rate.usdCents;
     const authorized=provider?.status==='authorized'&&rules.allowed.includes(invoice.key);
@@ -63,7 +65,7 @@
     const currency=!!provider?.currencies?.includes(invoice.currency);
     const checks=[
       {label:'Tasa disponible para la evaluación',pass:rate.valid,detail:rate.valid?`1 USD = ${rate.localPerUsd} ${invoice.currency} · ${rate.date} · ${rate.source}`:'Falta una tasa válida del día de evaluación. Consulta o carga una tasa.'},
-      {label:'No es un cobro duplicado',pass:invoice.type!=='duplicate',detail:invoice.type==='duplicate'?`Mismo proveedor y referencia que ${invoice.duplicateOf||'otra factura'}.`:'Sin coincidencia exacta en este set.'},
+      {label:'No es un cobro duplicado',pass:invoice.type!=='duplicate',detail:invoice.type==='duplicate'?`Mismo proveedor, número de factura, fecha de emisión y vencimiento que ${invoice.duplicateOf||'otra factura'}.`:'Sin coincidencia exacta en este set.'},
       {label:'Proveedor autorizado',pass:authorized,detail:`Estado: ${provider?.status==='excluded'?'Excluido':authorized?'Autorizado':'Sin registrar'} · lista v${providers.version}.`},
       {label:'Moneda admitida por el proveedor',pass:currency,detail:`Monedas acordadas: ${provider?.currencies.join(', ')||'Sin registrar'}.`},
       {label:'Total dentro del límite automático',pass:rate.valid&&cents<=rules.limit,detail:`${money(cents)} frente a ${money(rules.limit)} USD.`},
@@ -114,7 +116,7 @@
     const date=new Date(data.time_last_update_unix*1000).toISOString().slice(0,10);
     return {version,mode:'current',fetchedAt:new Date().toISOString(),rates:Object.fromEntries(Object.keys(data.rates).filter(c=>/^[A-Z]{3}$/.test(c)&&Number.isFinite(data.rates[c])&&data.rates[c]>0).map(c=>[c,{value:data.rates[c],date,source:'ExchangeRate-API · open.er-api.com',origin:'external'}]))};
   }
-  const api={clone,BUILTIN_CRITERIA,BASE_RULES,INVOICES,BASE_PROVIDERS,BASE_FX,today,money,rateValid,fxFor,evaluate,evaluateBatch,summarize,validateRules,humanDecision,externalRates,criterionValue,criterionCheck,validateCriterion,accountKey,bankMatches};
+  const api={sameInvoice,clone,BUILTIN_CRITERIA,BASE_RULES,INVOICES,BASE_PROVIDERS,BASE_FX,today,money,rateValid,fxFor,evaluate,evaluateBatch,summarize,validateRules,humanDecision,externalRates,criterionValue,criterionCheck,validateCriterion,accountKey,bankMatches};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;
   root.GuardDomain=api;
 })(typeof window!=='undefined'?window:globalThis);

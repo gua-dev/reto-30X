@@ -1,47 +1,79 @@
-/* Market presentation: illustrative history is deliberately separate from applied rates. */
+/* Rates presentation uses the application's persisted rates and original form handlers. */
 (() => {
   'use strict';
-  const pairs = [['USD','COP'],['USD','MXN'],['EUR','USD'],['USD','VES'],['USD','ARS'],['BTC','USD'],['ETH','USD'],['USDC','USD']];
-  const samples = {'USD/COP':4210,'USD/MXN':18.65,'EUR/USD':1.09,'USD/VES':43.2,'USD/ARS':1045,'BTC/USD':67420,'ETH/USD':2680,'USDC/USD':1};
-  let range = 30;
-  const number = value => new Intl.NumberFormat('es',{maximumFractionDigits: value < 2 ? 5 : 2}).format(value);
-  function history(a,b) {
-    const base=samples[a+'/'+b] || (samples[b+'/'+a] ? 1/samples[b+'/'+a] : 100);
-    let last=base*.97;
-    return Array.from({length:range},(_,i)=>{
-      const open=last, close=base*(.97+.001*i+.013*Math.sin(i*1.7)+.007*Math.cos(i*.55));
-      last=close;
-      return {open,close,high:Math.max(open,close)*1.006,low:Math.min(open,close)*.994,volume:30+Math.abs(Math.sin(i*2.3))*65};
+  let query = '';
+  const number = value => new Intl.NumberFormat('es', {maximumFractionDigits: 6}).format(value);
+  const key = (a,b) => a+'/'+b;
+  function rows(C) {
+    const fx=C.state.candidate||C.state.fx;
+    const pairs=[...C.state.favorites,...Object.keys(C.state.pairRates||{}).map(p=>p.split('/')),...Object.keys(fx.rates||{}).filter(c=>c!=='USD').map(c=>['USD',c])];
+    const seen=new Set();
+    return pairs.filter(([a,b])=>{const id=key(a,b);if(seen.has(id))return false;seen.add(id);return true;}).map(([a,b])=>{
+      const rate=C.pairValue(a,b);
+      const direct=C.state.pairRates[key(a,b)],inverse=C.state.pairRates[key(b,a)];
+      const stored=direct?.date===C.D.today()?direct:inverse?.date===C.D.today()?inverse:null;
+      const manual=stored?.origin==='manual'||(!stored&&(fx.rates[b]?.origin==='manual'||(b==='USD'&&fx.rates[a]?.origin==='manual')));
+      return {a,b,id:key(a,b),rate,source:rate?(manual?'Manual':/ejemplo|sintétic/i.test(rate.source||'')?'Carga inicial':rate.source):'Fuente pendiente',favorite:C.state.favorites.some(p=>p[0]===a&&p[1]===b)};
     });
   }
-  function chart(C,a,b) {
-    const rows=history(a,b),low=Math.min(...rows.map(r=>r.low)),high=Math.max(...rows.map(r=>r.high)),span=high-low;
-    const y=v=>28+(high-v)/span*210,w=648/rows.length;
-    const grid=Array.from({length:5},(_,i)=>{const yy=28+i*52.5;return `<line x1="8" y1="${yy}" x2="660" y2="${yy}" class="rg-grid"/><text x="670" y="${yy+4}">${number(high-i*span/4)}</text>`;}).join('');
-    const candles=rows.map((r,i)=>{const x=14+i*w,up=r.close>=r.open;return `<g class="${up?'rg-up':'rg-down'}"><title>Día ${i+1}: apertura ${number(r.open)}, cierre ${number(r.close)} ${C.esc(b)}; datos ficticios</title><line x1="${x+w/2}" x2="${x+w/2}" y1="${y(r.high)}" y2="${y(r.low)}"/><rect x="${x+w*.2}" y="${Math.min(y(r.open),y(r.close))}" width="${Math.max(2,w*.6)}" height="${Math.max(2,Math.abs(y(r.open)-y(r.close)))}"/><rect class="rg-volume" x="${x+w*.2}" y="${305-r.volume*.45}" width="${Math.max(2,w*.6)}" height="${r.volume*.45}"/></g>`;}).join('');
-    const first=rows[0].open,last=rows.at(-1).close,change=(last/first-1)*100;
-    return `<div class="rg-chart-summary"><div><span class="small muted">Cierre ilustrativo · ${C.esc(b)}</span><strong>${number(last)}</strong></div><div><span class="small muted">Variación ilustrativa · ${range} días</span><strong class="${change>=0?'rg-rise':'rg-fall'}">${change>=0?'+':''}${change.toFixed(2)}%</strong></div><div><span class="small muted">Máximo / mínimo ilustrativos</span><strong class="rg-minmax">${number(high)} / ${number(low)}</strong></div></div><svg class="rg-chart" viewBox="0 0 770 338" role="img" aria-label="Histórico ficticio de ${C.esc(a)} a ${C.esc(b)}, ${range} días. Velas de apertura, máximo, mínimo y cierre; barras de actividad ilustrativa.">${grid}${candles}<text x="10" y="330">Hace ${range} días</text><text x="600" y="330">Hoy</text></svg><div class="rg-chart-foot small muted"><span><i class="rg-legend-up"></i> Sube <i class="rg-legend-down"></i> Baja · Barras: actividad ilustrativa</span><span>Serie sintética · No se utiliza para evaluar facturas</span></div>`;
+  function star(C,r) {return `<button type="button" class="rg-star ${r.favorite?'is-active':''}" data-rg-star="${C.esc(r.id)}" aria-pressed="${r.favorite}" aria-label="${r.favorite?'Quitar de destacadas':'Destacar'} ${C.esc(r.a+' / '+r.b)}">${r.favorite?'★':'☆'}</button>`;}
+  function conversion(C,r) {return r.rate?`1 ${C.esc(r.a)} = ${number(r.rate.value)} ${C.esc(r.b)}`:'Sin tasa disponible';}
+  function searchText(r) {
+    let names='';try{const display=new Intl.DisplayNames(['es'],{type:'currency'});names=display.of(r.a)+' '+display.of(r.b);}catch(_){}
+    return (r.a+' '+r.b+' '+r.id+' '+r.a+' / '+r.b+' '+names).toLocaleLowerCase();
   }
-  function decorate(C, original) {
+  function tableRows(C) {
+    const visible=rows(C).filter(r=>searchText(r).includes(query.toLocaleLowerCase().trim()));
+    return visible.map(r=>`<tr><td>${star(C,r)}</td><td><strong>${C.esc(r.a)} / ${C.esc(r.b)}</strong></td><td class="rg-conversion">${conversion(C,r)}</td><td class="rg-source"><strong title="${C.esc(r.rate?.source||'')}">${C.esc(r.source)}</strong><small>${C.esc(r.rate?.date||'—')}</small></td><td><button type="button" class="btn sm" data-rg-edit="${C.esc(r.id)}">${r.rate?'Editar tasa':'Añadir valor'}</button></td></tr>`).join('')||'<tr><td colspan="5" class="muted">No hay tasas que coincidan con la búsqueda.</td></tr>';
+  }
+  function decorate(C,original) {
     const host=document.createElement('div');host.innerHTML=original;
     const form=host.querySelector('#pair-form');if(!form)return original;
-    const a=form.elements.from.value,b=form.elements.to.value;
-    host.querySelector('.page-heading p').textContent='Compara monedas, consulta referencias y configura las tasas de tus operaciones.';
-    const applied=C.pairValue(a,b);
-    const market=document.createElement('div');market.className='rg-market';
-    market.innerHTML=`<div class="rg-pairs" aria-label="Pares de acceso rápido">${pairs.map(([x,z])=>{const r=C.pairValue(x,z);return `<button class="rg-pair ${a===x&&b===z?'is-selected':''}" data-rg-pair="${x}/${z}" aria-pressed="${a===x&&b===z}"><span>${x} / ${z}</span><strong>${r?number(r.value):'Sin referencia'}</strong><small>${r?C.esc(r.date):'Añadir tasa manual'}</small></button>`;}).join('')}</div><section class="panel rg-history"><div class="rg-section-head"><div><h2>${C.esc(a)} / ${C.esc(b)}</h2><span class="badge">Histórico ilustrativo</span></div><div class="button-row" aria-label="Periodo del gráfico">${[7,30,90].map(n=>`<button class="btn sm ${range===n?'primary':''}" data-rg-range="${n}" aria-pressed="${range===n}">${n} días</button>`).join('')}</div></div>${chart(C,a,b)}<div class="rg-applied"><div><span class="small muted">Referencia disponible para operaciones</span><strong>${applied?`1 ${C.esc(a)} = ${number(applied.value)} ${C.esc(b)}`:'Sin referencia disponible'}</strong><span class="small muted">${applied?`${C.esc(applied.source)} · ${C.esc(applied.date)}`:'Añade una fuente y el valor en el formulario inferior.'}</span></div><button class="btn" id="rg-edit-rate">Editar tasa de hoy ↓</button></div></section></div>`;
-    const layout=host.querySelector('.rates-layout');layout.before(market);
-    const title=layout.querySelector('h2');if(title)title.textContent='Configurar tasa de hoy';
-    const list=form.querySelector('input[name="from"]');if(list)list.placeholder='Buscar código: USD, EUR…';
-    form.elements.to.placeholder='Buscar código: COP, BTC…';
-    const comparison=document.createElement('section');comparison.className='panel rg-comparison';
-    comparison.innerHTML=`<div class="rg-section-head"><div><h2>Comparación de pares</h2><p class="small muted">Referencias disponibles y variación de una serie ficticia, identificadas por separado.</p></div></div><div class="rg-table-scroll" tabindex="0" role="region" aria-label="Comparación de tasas. Desplaza horizontalmente para consultar todas las columnas"><table><thead><tr><th>Par</th><th>Referencia disponible</th><th>Fuente / fecha</th><th>Variación ${range} días<br><span class="small muted">Ilustrativa</span></th><th><span class="sr-only">Acción</span></th></tr></thead><tbody>${pairs.map(([x,z])=>{const r=C.pairValue(x,z),h=history(x,z),v=(h.at(-1).close/h[0].open-1)*100;return `<tr><td><strong>${x} / ${z}</strong></td><td>${r?number(r.value)+' '+z:'Sin referencia'}</td><td class="rg-source">${r?`${C.esc(r.source)}<small>${C.esc(r.date)}</small>`:'Pendiente de registrar'}</td><td class="${v>=0?'rg-rise':'rg-fall'}">${v>=0?'+':''}${v.toFixed(2)}%</td><td><button class="btn sm" data-rg-pair="${x}/${z}" aria-label="Ver par ${x} a ${z}">Ver par</button></td></tr>`;}).join('')}</tbody></table></div>`;
-    layout.after(comparison);return host.innerHTML;
+    const heading=host.querySelector('.page-heading');heading.classList.add('rg-heading');
+    heading.querySelector('p').textContent='Consulta y gestiona las tasas para tus pagos.';
+    const fetch=host.querySelector('#fetch-rates'),busy=fetch.textContent.includes('Consultando');
+    fetch.textContent=busy?'Consultando…':'Consultar referencia del día';fetch.disabled=busy;fetch.setAttribute('aria-busy',String(busy));
+    const actions=document.createElement('div');actions.className='rg-header-actions';actions.append(fetch);actions.insertAdjacentHTML('beforeend','<button type="button" class="btn primary" id="rg-add"><span aria-hidden="true">＋</span>Añadir tasa manual</button>');heading.append(actions);
+    const layout=host.querySelector('.rates-layout'),apply=host.querySelector('#apply-rates');
+    const content=document.createElement('div');content.className='rg-page';
+    content.innerHTML=`<section aria-labelledby="rg-favorites-title"><div class="rg-section-heading"><h2 id="rg-favorites-title">Destacadas</h2><span class="small muted">Elige entre 2 y 4 pares para tenerlos a mano.</span></div><div class="rg-favorites">${rows(C).filter(r=>r.favorite).slice(0,4).map(r=>`<article class="rg-favorite"><div class="rg-favorite-top"><strong>${C.esc(r.a)} / ${C.esc(r.b)}</strong>${star(C,r)}</div><p class="rg-value">${conversion(C,r)}</p><div class="rg-favorite-bottom"><span class="small muted" title="${C.esc(r.rate?.source||'')}">${C.esc(r.source)}</span><button type="button" class="rg-link" data-rg-edit="${C.esc(r.id)}">${r.rate?'Editar':'Añadir valor'}</button></div></article>`).join('')}</div></section><div class="rg-toolbar"><label class="rg-search"><span class="sr-only">Buscar moneda o par</span><input type="search" id="rg-search" value="${C.esc(query)}" placeholder="Buscar moneda o par"></label></div><div class="rg-table-scroll" tabindex="0" role="region" aria-label="Tasas de cambio"><table><thead><tr><th><span class="sr-only">Destacar</span></th><th>Par de monedas</th><th>Tasa</th><th>Fuente y fecha</th><th><span class="sr-only">Acciones</span></th></tr></thead><tbody id="rg-rows">${tableRows(C)}</tbody></table></div><div class="rg-foot"><span class="small muted">Referencias indicativas · <a href="https://www.exchangerate-api.com" target="_blank" rel="noopener">Fuente diaria: ExchangeRate-API</a></span><button type="button" class="rg-link" id="rg-history">Ver historial de cambios</button></div>`;
+    if(apply){const proposal=document.createElement('div');proposal.className='notice info rg-proposal';proposal.innerHTML='<p>La consulta preparó una propuesta. Aplica las tasas consultadas para procesar las facturas pendientes.</p>';proposal.append(apply);content.append(proposal);}
+    const dialog=document.createElement('dialog');dialog.id='rg-editor';dialog.className='rg-dialog';dialog.setAttribute('aria-labelledby','rg-editor-title');dialog.innerHTML='<h2 id="rg-editor-title">Añadir tasa manual</h2>';
+    form.querySelector('#pin-pair').textContent='Destacar este par';
+    form.insertAdjacentHTML('beforeend','<button class="btn" type="button" data-rg-close>Cancelar</button>');
+    dialog.append(form);content.append(dialog);
+    content.insertAdjacentHTML('beforeend','<dialog id="rg-history-dialog" class="rg-dialog" aria-labelledby="rg-history-title"><h2 id="rg-history-title">Historial de tasas</h2><div id="rg-history-content"></div><div class="button-row"><button type="button" class="btn" data-rg-close>Cerrar</button></div></dialog>');
+    layout.replaceWith(content);return host.innerHTML;
   }
   function bind(C) {
-    document.querySelectorAll('[data-rg-pair]').forEach(button=>button.onclick=()=>{C.state.activePair=button.dataset.rgPair.split('/');C.save();if(C.route!=='rates')C.go('#rates');C.render();});
-    document.querySelectorAll('[data-rg-range]').forEach(button=>button.onclick=()=>{range=Number(button.dataset.rgRange);C.render();document.querySelector(`[data-rg-range="${range}"]`)?.focus({preventScroll:true});});
-    const edit=document.getElementById('rg-edit-rate');if(edit)edit.onclick=()=>{const input=document.querySelector('#pair-form [name="value"]');input?.scrollIntoView({behavior:'smooth',block:'center'});input?.focus({preventScroll:true});};
+    const form=document.getElementById('pair-form'),dialog=document.getElementById('rg-editor');if(!form||!dialog)return;
+    function open(id) {
+      const pair=id?id.split('/'):['USD',''];
+      form.elements.from.value=pair[0];form.elements.to.value=pair[1];
+      form.elements.from.readOnly=!!id;form.elements.to.readOnly=!!id;
+      form.elements.to.dispatchEvent(new Event('input',{bubbles:true}));
+      form.querySelector('#pair-error').textContent='';
+      const note=form.querySelector('#pair-note');if(note)note.value='';
+      document.getElementById('rg-editor-title').textContent=id?'Editar tasa':'Añadir tasa manual';
+      dialog.showModal();(id?form.elements.value:form.elements.to).focus();
+    }
+    function bindRows() {
+      document.querySelectorAll('[data-rg-edit]').forEach(button=>button.onclick=()=>open(button.dataset.rgEdit));
+      document.querySelectorAll('[data-rg-star]').forEach(button=>button.onclick=()=>{
+        const pair=button.dataset.rgStar.split('/'),index=C.state.favorites.findIndex(p=>p[0]===pair[0]&&p[1]===pair[1]);
+        if(index>=0){if(C.state.favorites.length<=2){C.notify('Conserva al menos dos pares destacados.');return;}C.state.favorites.splice(index,1);}
+        else {if(C.state.favorites.length>=4){C.notify('Ya tienes cuatro pares destacados. Quita una estrella antes de añadir otro.');return;}C.state.favorites.push(pair);}
+        C.save();C.render();document.querySelector(`[data-rg-star="${pair.join('/')}"]`)?.focus({preventScroll:true});
+      });
+    }
+    bindRows();document.getElementById('rg-add').onclick=()=>open();
+    document.getElementById('rg-search').oninput=e=>{query=e.target.value;document.getElementById('rg-rows').innerHTML=tableRows(C);bindRows();};
+    document.querySelectorAll('[data-rg-close]').forEach(button=>button.onclick=()=>button.closest('dialog').close());
+    document.getElementById('rg-history').onclick=()=>{
+      const events=[...C.state.events].reverse().filter(e=>e.kind==='fx'||e.kind.startsWith('fx-'));
+      document.getElementById('rg-history-content').innerHTML=events.length?events.map(e=>`<article class="rg-history-row"><h3>${C.esc(e.title)}</h3><small class="muted">${C.esc(new Date(e.at).toLocaleString('es'))} · ${C.esc(e.record?.actor||'')}</small><p>${C.esc(e.detail||'')}</p>${e.record?.rate?.source?`<p class="small muted">Fuente: ${C.esc(e.record.rate.source)}</p>`:''}</article>`).join(''):'<p class="muted">Todavía no hay cambios de tasas registrados.</p>';
+      document.getElementById('rg-history-dialog').showModal();
+    };
   }
   window.GuardPages=window.GuardPages||{};window.GuardPages.rates={decorate,bind};
 })();

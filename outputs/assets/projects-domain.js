@@ -45,7 +45,9 @@
   function evaluate(state,invoices,invoice,opts={}){
     const {project:p,evidence}=identify(invoice,state),cfg=applied(state,p,invoice.key),rules={...clone(state.rules),criteria:cfg.criteria};
     const available=opts.available??D.summarize(state.results,state.rules).available;
-    const result=baseEvaluate(invoice,rules,available,opts.providers||state.providers,opts.fx||state.fx);
+    const index=invoices.findIndex(x=>x.id===invoice.id),prior=index<0?invoices:invoices.slice(0,index),duplicate=prior.find(x=>D.sameInvoice(x,invoice));
+    const evaluatedInvoice={...invoice,type:duplicate?'duplicate':invoice.type==='duplicate'?'manual':invoice.type,duplicateOf:duplicate?.id};
+    const result=baseEvaluate(evaluatedInvoice,rules,available,opts.providers||state.providers,opts.fx||state.fx);
     result.projectSnapshot=p?clone(p):null;result.assignmentEvidence=evidence;result.ruleGroupsSnapshot=clone(cfg.groups);result.agreementSnapshot=cfg.agreement?clone(cfg.agreement):null;
     const check=(label,pass,detail,action='review',id='project')=>({label,pass,detail,action,criterionId:id,scope:p?.name||'Proyecto'});
     const checks=[check('Proyecto identificado',!!p,evidence)];
@@ -59,14 +61,21 @@
       if(cfg.agreement){const a=cfg.agreement;
         checks.push(check('Moneda acordada para este proyecto',a.currencies.includes(invoice.currency),'Monedas del acuerdo: '+a.currencies.join(', ')));
         checks.push({...check('Importe dentro del acuerdo del proyecto',result.fxSnapshot.valid&&result.fxSnapshot.usdCents<=a.limit,'Límite acordado: '+D.money(a.limit)+' USD.','review','project-limit'),pending:!result.fxSnapshot.valid});
-        checks.push(check('Servicio acordado en el proyecto',!!a.service.trim()&&a.category===invoice.category&&invoice.type!=='mismatch',a.service||'Falta registrar el servicio.'));
+        checks.push(check('Servicio acordado en el proyecto',!!a.service.trim()&&a.category===invoice.category&&invoice.type!=='mismatch',a.service||'Falta registrar el servicio.','review','project-service'));
       }
     }
     result.checks=[...checks,...result.checks];
-    const failures=result.checks.filter(c=>!c.pass&&!c.pending),blocked=failures.find(c=>c.action==='blocked');
+    result.checks.forEach(c=>{c.exceptionKey=c.criterionId;c.exceptionEligible=['limit','contract'].includes(rules.criteria.find(x=>x.id===c.criterionId)?.kind)||['project-limit','project-service'].includes(c.criterionId);});
+    const authorizations=(state.invoiceExceptions?.[invoice.id]||[]).filter(a=>a.signature===exceptionSignature(state,invoice));
+    result.checks.forEach(c=>{const a=authorizations.find(a=>a.key===c.exceptionKey);if(a&&canException(c)){c.exception=a;c.exempted=true;}});
+    const failures=result.checks.filter(c=>!c.pass&&!c.pending&&!c.exempted),blocked=failures.find(c=>c.action==='blocked');
     if(blocked){result.status='blocked';result.code=blocked.criterionId?.startsWith('project')?'project':'criterion';result.reason='No cumple «'+blocked.label+'». '+blocked.detail;}
     else if(result.code!=='excluded'&&failures.length){result.status='review';result.code=checks.some(c=>!c.pass)?'project':result.code;result.reason='No cumple «'+failures[0].label+'». '+failures[0].detail;}
     else if(result.status==='approved'){result.reason='Cumple todos los criterios de empresa, proyecto y acuerdo del proveedor.';}
+    if(result.checks.some(c=>c.exempted)&&!failures.length&&!result.checks.some(c=>c.pending)&&result.code!=='excluded'){
+      result.status=opts.allowAuthorizedPayment?'approved':'review';result.code='authorized-exception';result.reason=opts.allowAuthorizedPayment?'Finanzas autorizó las excepciones registradas. Los demás criterios se cumplen.':'Excepciones autorizadas. Confirma el pago para continuar.';
+    }
+    result.invoiceDataSnapshot.issueDate=invoice.issueDate||"";result.duplicateOf=duplicate?.id||null;
     result.invoiceDataSnapshot.projectReference=invoice.projectReference||'';result.invoiceDataSnapshot.projectId=p?.id||null;
     return result;
   }
@@ -91,5 +100,7 @@
     const series=Array.from({length:days===7?7:days===90?12:15},(_,n)=>({label:days===90?'S'+(n+1):String(n+1),paid:Math.round((27000+Math.sin(n*1.7)*14000+n*1000)*factor),count:Math.round((28+Math.sin(n*.9)*10+n)*factor),latency:Math.round(1280+Math.sin(n*1.4)*300)}));
     return {count:rows.length,paidCount:rs.filter(r=>r.status==='approved').length,review:rs.filter(r=>r.status==='review').length,rejected:rs.filter(r=>['blocked','rejected'].includes(r.status)).length,automatic,paid,pending,budget,available:budget-(id==='all'?state.rules.priorSpent:0)-paid,automation:rows.length?Math.round(100*automatic/rows.length):0,byCurrency:grouping(i=>i.currency),byProvider:grouping(i=>i.vendor),series,technical:{avgMs:1420,p95Ms:2180,jevMs:118,throughput:42,errorRate:.8,calls:Math.round(days*31*factor),tokens:Math.round(days*36400*factor),costUsd:Number((days*.72*factor).toFixed(2)),manualMinutes:8,savedHours:Number((days*31*factor*8*.78/60).toFixed(1))},illustrative:true};
   }
-  const api={migrate,syncGroups,identify,applied,evaluate,batch,invoiceProject,projectUsage:usage,metrics};root.GuardProjects=api;if(typeof module!=='undefined')module.exports=api;
+  function canException(c){return !c.pass&&!c.pending&&c.action==='review'&&c.exceptionEligible===true;}
+  function exceptionSignature(state,i){return JSON.stringify([i.id,i.key,i.original,i.currency,i.reference,i.due,i.projectId,i.projectReference,i.concept,i.category,state.rules.version,state.providers.version,state.fx.version,state.projectsVersion]);}
+  const api={canException,exceptionSignature,migrate,syncGroups,identify,applied,evaluate,batch,invoiceProject,projectUsage:usage,metrics};root.GuardProjects=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);
